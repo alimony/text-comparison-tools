@@ -78,9 +78,10 @@ def main():
 
     # Generate a list of (length, sentence) tuples suited for tabulate.
     lengths_sentences = [(len(m), re.sub(pattern, r'\1', ' '.join(m))) for m in matches]
+    lengths_sentences = [(n, len(sentence), sentence) for (n, sentence) in lengths_sentences]
 
     # Finally, print results in a nice table.
-    print(tabulate(lengths_sentences, headers=['n', 'full sentence']))
+    print(tabulate(lengths_sentences, headers=['n', 'text length', 'full sentence']))
 
 if __name__ == '__main__':
     main()
