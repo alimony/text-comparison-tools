@@ -60,7 +60,7 @@ def main():
     # an set intersection to find common ones.
     for i in range(args.min_words, max_words + 1):
         ngram_sets = [set(ngrams(t, i)) for t in tokens]
-        matches = set.intersection(ngram_sets)
+        matches = set.intersection(*ngram_sets)
         print('Found {} matching ngrams of length {}'.format(len(matches), i))
         all_matches.update(matches)
 
