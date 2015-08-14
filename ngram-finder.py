@@ -4,6 +4,7 @@
 import argparse
 import re
 import sys
+from operator import itemgetter
 
 import nltk
 from nltk.tokenize.punkt import PunktSentenceTokenizer
@@ -11,6 +12,10 @@ from nltk.util import ngrams
 from tabulate import tabulate
 
 DEFAULT_MIN_WORDS = 4
+
+SORT_N = 'n'
+SORT_LENGTH = 'length'
+SORT_ALPHA = 'alpha'
 
 
 def main():
@@ -27,6 +32,10 @@ def main():
                         help='''max number of words to look for, must be larger than
                              or equal to min words (default: number of words in the
                              longest sentence found in either text''')
+
+    parser.add_argument('--sort', type=str, default=SORT_N, choices=[SORT_N, SORT_LENGTH, SORT_ALPHA],
+                        help='''how to sort final output, by n-gram length, text
+                             length, or sentence alphabetically (default: n)''')
 
     args = parser.parse_args()
 
@@ -69,8 +78,7 @@ def main():
 
     print('Found these matches for n-grams of length {} to {}:'.format(args.min_words, max_words))
 
-    # Assemble all matches and sort by word count descending.
-    matches = sorted(list(all_matches), key=len, reverse=True)
+    matches = list(all_matches)
 
     # We will remove leading space from punctuation, using the punctuation
     # definition from our sentence tokenizer.
@@ -80,8 +88,16 @@ def main():
     lengths_sentences = [(len(m), re.sub(pattern, r'\1', ' '.join(m))) for m in matches]
     lengths_sentences = [(n, len(sentence), sentence) for (n, sentence) in lengths_sentences]
 
+    # Sort output accordingly.
+    if args.sort == SORT_N:
+        lengths_sentences = sorted(lengths_sentences, key=itemgetter(0), reverse=True)
+    elif args.sort == SORT_LENGTH:
+        lengths_sentences = sorted(lengths_sentences, key=itemgetter(1), reverse=True)
+    elif args.sort == SORT_ALPHA:
+        lengths_sentences = sorted(lengths_sentences, key=itemgetter(2))
+
     # Finally, print results in a nice table.
-    print(tabulate(lengths_sentences, headers=['n', 'text length', 'full sentence']))
+    print(tabulate(lengths_sentences, headers=['n', 'length', 'sentence']))
 
 if __name__ == '__main__':
     main()
