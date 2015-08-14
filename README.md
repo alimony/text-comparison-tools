@@ -8,13 +8,13 @@ On first run, the needed nltk data will be downloaded to its default location.
 
 ```
 usage: ngram-finder.py [-h] [--min-words MIN_WORDS] [--max-words MAX_WORDS]
-                       file1 file2
+                       [--sort {n,length,alpha}]
+                       files [files ...]
 
-Compare two texts to find common word sequences (n-grams)
+Compare texts to find common word sequences (n-grams)
 
 positional arguments:
-  file1                 first text file to compare
-  file2                 second text file to compare
+  files                 text files to compare
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -24,4 +24,7 @@ optional arguments:
                         max number of words to look for, must be larger than
                         or equal to min words (default: number of words in the
                         longest sentence found in either text
+  --sort {n,length,alpha}
+                        how to sort final output, by n-gram length, text
+                        length, or sentence alphabetically (default: n)
 ```
