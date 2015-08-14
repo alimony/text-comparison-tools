@@ -1,8 +1,8 @@
 # ngram-finder
 
-Compare two texts to find common word sequences (n-grams)
+Compare two texts to find common word sequences (n-grams).
 
-Requires Python 3 and the `nltk` module.
+Requires Python 3 and the `nltk` and `tabulate` modules.
 
 On first run, the needed nltk data will be downloaded to its default location.
 
