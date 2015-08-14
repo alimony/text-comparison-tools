@@ -56,18 +56,18 @@ def main():
 
     all_matches = set()
 
-    # For every n-gram length we are looking for, make sets out of them and do
-    # an set intersection to find common ones.
+    # For every n-gram length we are looking for, make sets and do an
+    # intersection to find common ones.
     for i in range(args.min_words, max_words + 1):
         ngram_sets = [set(ngrams(t, i)) for t in tokens]
         matches = set.intersection(*ngram_sets)
-        print('Found {} matching ngrams of length {}'.format(len(matches), i))
+        print('Found {} matching n-grams of length {}'.format(len(matches), i))
         all_matches.update(matches)
 
-    print('Found these matches for ngrams of length {} to {}:'.format(args.min_words, max_words))
+    print('Found these matches for n-grams of length {} to {}:'.format(args.min_words, max_words))
 
     for match in sorted(list(all_matches), key=len, reverse=True):
-        print(match)
+        print(' '.join(match))
 
 if __name__ == '__main__':
     main()
