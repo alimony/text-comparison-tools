@@ -2,10 +2,13 @@
 # encoding: utf-8
 
 import argparse
+import re
 import sys
 
 import nltk
+from nltk.tokenize.punkt import PunktSentenceTokenizer
 from nltk.util import ngrams
+from tabulate import tabulate
 
 DEFAULT_MIN_WORDS = 4
 
@@ -66,8 +69,18 @@ def main():
 
     print('Found these matches for n-grams of length {} to {}:'.format(args.min_words, max_words))
 
-    for match in sorted(list(all_matches), key=len, reverse=True):
-        print(' '.join(match))
+    # Assemble all matches and sort by word count descending.
+    matches = sorted(list(all_matches), key=len, reverse=True)
+
+    # We will remove leading space from punctuation, using the punctuation
+    # definition from our sentence tokenizer.
+    pattern = ' ([{}])'.format(''.join(PunktSentenceTokenizer.PUNCTUATION))
+
+    # Generate a list of (length, sentence) tuples suited for tabulate.
+    lengths_sentences = [(len(m), re.sub(pattern, r'\1', ' '.join(m))) for m in matches]
+
+    # Finally, print results in a nice table.
+    print(tabulate(lengths_sentences, headers=['n', 'full sentence']))
 
 if __name__ == '__main__':
     main()
