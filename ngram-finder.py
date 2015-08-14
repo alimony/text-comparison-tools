@@ -11,13 +11,10 @@ DEFAULT_MIN_WORDS = 4
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Compare two texts to find common word sequences (n-grams)')
+    parser = argparse.ArgumentParser(description='Compare texts to find common word sequences (n-grams)')
 
-    parser.add_argument('file1', type=argparse.FileType('rU'),
-                        help='first text file to compare')
-
-    parser.add_argument('file2', type=argparse.FileType('rU'),
-                        help='second text file to compare')
+    parser.add_argument('files', nargs='+', type=argparse.FileType('rU'),
+                        help='text files to compare')
 
     parser.add_argument('--min-words', type=int, default=DEFAULT_MIN_WORDS,
                         help='min number of words to look for (default: {})'
@@ -30,12 +27,15 @@ def main():
 
     args = parser.parse_args()
 
+    if len(args.files) < 2:
+        sys.exit('You must specify at least two text files')
+
     # Download required nltk data if needed.
     nltk.download('punkt')
 
     # Create the tokenized lists of words from both texts.
-    texts = [args.file1.read(), args.file2.read()]
-    texts = [f.lower() for f in texts]
+    texts = [f.read() for f in args.files]
+    texts = [t.lower() for t in texts]
     tokens = [nltk.word_tokenize(t) for t in texts]
 
     print('Setting min words to {}'.format(args.min_words))
