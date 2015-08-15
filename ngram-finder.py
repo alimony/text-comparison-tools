@@ -17,6 +17,8 @@ SORT_N = 'n'
 SORT_LENGTH = 'length'
 SORT_ALPHA = 'alpha'
 
+PUNCTUATION_SET = set(PunktSentenceTokenizer.PUNCTUATION)
+
 
 def main():
     parser = argparse.ArgumentParser(description='Compare texts to find common word sequences (n-grams)')
@@ -40,7 +42,7 @@ def main():
     args = parser.parse_args()
 
     if len(args.files) < 2:
-        sys.exit('You must specify at least two text files')
+        sys.exit('You must specify at least two text files to compare')
 
     # Download required nltk data if needed.
     nltk.download('punkt')
@@ -73,19 +75,34 @@ def main():
     for i in range(args.min_words, max_words + 1):
         ngram_sets = [set(ngrams(t, i)) for t in tokens]
         matches = set.intersection(*ngram_sets)
-        print('Found {} matching n-grams of length {}'.format(len(matches), i))
-        all_matches.update(matches)
 
-    print('Found these matches for n-grams of length {} to {}:'.format(args.min_words, max_words))
+        # Filter out any matching n-grams that are less than min_words long when
+        # disregarding punctuation, add them to their respective set instead.
+        for m in matches:
+            true_n = len(set(m) - PUNCTUATION_SET)
+            if true_n < args.min_words:
+                continue
+            all_matches.add((true_n, m))
 
-    matches = list(all_matches)
+    if not all_matches:
+        print('Found no matches, exiting')
+        sys.exit()
+
+    counts = {}
+    for (true_n, m) in all_matches:
+        if true_n not in counts:
+            counts[true_n] = 0
+        counts[true_n] += 1
+
+    for length, count in sorted(counts.items(), key=itemgetter(0), reverse=True):
+        print('Found {} matches for n-grams of length {}'.format(count, length))
 
     # We will remove leading space from punctuation, using the punctuation
     # definition from our sentence tokenizer.
     pattern = ' ([{}])'.format(''.join(PunktSentenceTokenizer.PUNCTUATION))
 
     # Generate a list of (length, sentence) tuples suited for tabulate.
-    lengths_sentences = [(len(m), re.sub(pattern, r'\1', ' '.join(m))) for m in matches]
+    lengths_sentences = [(n, re.sub(pattern, r'\1', ' '.join(m))) for (n, m) in all_matches]
     lengths_sentences = [(n, len(sentence), sentence) for (n, sentence) in lengths_sentences]
 
     # Sort output accordingly.
