@@ -78,16 +78,22 @@ def main():
     # For every n-gram length we are looking for, make sets and do an
     # intersection to find common ones.
     for i in range(args.min_words, max_words + 1):
+        # TODO: Replace last printer line for each iteration.
+        print('Checking for n-grams of length {}'.format(i))
+
         ngram_sets = [set(ngrams(t, i)) for t in tokens]
         matches = set.intersection(*ngram_sets)
 
         # Filter out any matching n-grams that are less than min_words long when
         # disregarding punctuation, add them to their respective set instead.
+        true_matches = []
         for m in matches:
             true_n = len(set(m) - PUNCTUATION_SET)
-            if true_n < args.min_words:
-                continue
-            all_matches.add((true_n, m))
+            if true_n >= args.min_words:
+                true_matches.append((true_n, m))
+
+        all_matches.update(true_matches)
+
         if args.zero_results > 0 and len(true_matches) == 0:
             zero_results += 1
             if zero_results >= args.zero_results:
