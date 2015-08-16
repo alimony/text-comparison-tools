@@ -66,7 +66,7 @@ def main():
     # Build list of what should count as punctuation.
     punctuation_set = set(args.punctuation)
 
-    # Create the tokenized lists of words from both texts.
+    # Create the tokenized lists of words from all texts.
     texts = [f.read() for f in args.files]
     texts = [t.lower() for t in texts]
     tokens = [nltk.word_tokenize(t) for t in texts]
