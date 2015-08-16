@@ -97,14 +97,17 @@ def main():
         # Filter out any matching n-grams that are less than min_words long when
         # disregarding punctuation, add them to their respective set instead.
         true_matches = []
+        count = 0
         for m in matches:
             true_n = len(set(m) - punctuation_set)
+            if true_n == i:
+                count += 1
             if true_n >= args.min_words:
                 true_matches.append((true_n, m))
 
         all_matches.update(true_matches)
 
-        if args.zero_results > 0 and len(true_matches) == 0:
+        if args.zero_results > 0 and count == 0:
             zero_results += 1
             if zero_results >= args.zero_results:
                 print('Got zero results for {} consecutive n-gram lengths, continuing'.format(args.zero_results))
@@ -120,7 +123,7 @@ def main():
             counts[true_n] = 0
         counts[true_n] += 1
 
-    for length, count in sorted(counts.items(), key=itemgetter(0), reverse=True):
+    for length, count in sorted(counts.items(), key=itemgetter(0)):
         print('Found {} matches for n-grams of length {}'.format(count, length))
 
     # We will remove leading space from punctuation, using the punctuation
