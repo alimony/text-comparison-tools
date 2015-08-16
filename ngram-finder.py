@@ -35,6 +35,10 @@ def main():
                              or equal to min words (default: number of words in the
                              longest sentence found in either text''')
 
+    parser.add_argument('--zero-results', type=int, default=3,
+                        help='''stop comparison after this many zero results for
+                             next n-gram length, set to 0 to disable (default: 3)''')
+
     parser.add_argument('--sort', type=str, default=SORT_N, choices=[SORT_N, SORT_LENGTH, SORT_ALPHA],
                         help='''how to sort final output, by n-gram length, text
                              length, or sentence alphabetically (default: n)''')
@@ -69,6 +73,7 @@ def main():
         sys.exit('Max words must be equal to or larger than min words, exiting')
 
     all_matches = set()
+    zero_results = 0
 
     # For every n-gram length we are looking for, make sets and do an
     # intersection to find common ones.
@@ -83,6 +88,11 @@ def main():
             if true_n < args.min_words:
                 continue
             all_matches.add((true_n, m))
+        if args.zero_results > 0 and len(true_matches) == 0:
+            zero_results += 1
+            if zero_results >= args.zero_results:
+                print('Got zero results for {} consecutive n-gram lengths, continuing'.format(args.zero_results))
+                break
 
     if not all_matches:
         print('Found no matches, exiting')
