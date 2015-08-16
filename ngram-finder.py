@@ -11,13 +11,14 @@ from nltk.tokenize.punkt import PunktSentenceTokenizer
 from nltk.util import ngrams
 from tabulate import tabulate
 
-DEFAULT_MIN_WORDS = 4
-
 SORT_N = 'n'
 SORT_LENGTH = 'length'
 SORT_ALPHA = 'alpha'
 
-PUNCTUATION_SET = set(PunktSentenceTokenizer.PUNCTUATION)
+DEFAULT_MIN_WORDS = 4
+DEFAULT_ZERO_RESULTS = 3
+DEFAULT_PUNCTUATION = '()' + ''.join(PunktSentenceTokenizer.PUNCTUATION)
+DEFAULT_SORT = SORT_N
 
 
 def main():
@@ -35,13 +36,19 @@ def main():
                              or equal to min words (default: number of words in the
                              longest sentence found in either text''')
 
-    parser.add_argument('--zero-results', type=int, default=3,
+    parser.add_argument('--zero-results', type=int, default=DEFAULT_ZERO_RESULTS,
                         help='''stop comparison after this many zero results for
-                             next n-gram length, set to 0 to disable (default: 3)''')
+                             next n-gram length, set to 0 to disable (default: {})'''
+                             .format(DEFAULT_ZERO_RESULTS))
 
-    parser.add_argument('--sort', type=str, default=SORT_N, choices=[SORT_N, SORT_LENGTH, SORT_ALPHA],
+    parser.add_argument('--punctuation', type=str, default=DEFAULT_PUNCTUATION,
+                        help='''what characters should count as punctuation (default: {})'''
+                        .format(DEFAULT_PUNCTUATION))
+
+    parser.add_argument('--sort', type=str, default=DEFAULT_SORT, choices=[SORT_N, SORT_LENGTH, SORT_ALPHA],
                         help='''how to sort final output, by n-gram length, text
-                             length, or sentence alphabetically (default: n)''')
+                             length, or sentence alphabetically (default: {})'''
+                             .format(DEFAULT_SORT))
 
     args = parser.parse_args()
 
@@ -50,6 +57,9 @@ def main():
 
     # Download required nltk data if needed.
     nltk.download('punkt')
+
+    # Build list of what should count as punctuation.
+    punctuation_set = set(args.punctuation)
 
     # Create the tokenized lists of words from both texts.
     texts = [f.read() for f in args.files]
@@ -78,7 +88,7 @@ def main():
     # For every n-gram length we are looking for, make sets and do an
     # intersection to find common ones.
     for i in range(args.min_words, max_words + 1):
-        # TODO: Replace last printer line for each iteration.
+        # TODO: Replace last printed line for each iteration.
         print('Checking for n-grams of length {}'.format(i))
 
         ngram_sets = [set(ngrams(t, i)) for t in tokens]
@@ -88,7 +98,7 @@ def main():
         # disregarding punctuation, add them to their respective set instead.
         true_matches = []
         for m in matches:
-            true_n = len(set(m) - PUNCTUATION_SET)
+            true_n = len(set(m) - punctuation_set)
             if true_n >= args.min_words:
                 true_matches.append((true_n, m))
 
