@@ -152,6 +152,7 @@ def main():
     # Sort output accordingly.
     if args.sort == SORT_N:
         lengths_sentences = sorted(lengths_sentences, key=itemgetter(0), reverse=True)
+    # TODO: Sort all of the below on alpha second, for predictable output.
     elif args.sort == SORT_LENGTH:
         lengths_sentences = sorted(lengths_sentences, key=itemgetter(1), reverse=True)
     elif args.sort == SORT_ALPHA:
