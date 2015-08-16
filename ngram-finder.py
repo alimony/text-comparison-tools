@@ -45,6 +45,11 @@ def main():
                         help='''what characters should count as punctuation (default: {})'''
                         .format(DEFAULT_PUNCTUATION))
 
+    # TODO: User proper store_const here.
+    parser.add_argument('--skip-subgrams', type=bool, default=True,
+                        help='''skip resulting n-grams that are subsets of any
+                             longer n-grams found (default: true)''')
+
     parser.add_argument('--sort', type=str, default=DEFAULT_SORT, choices=[SORT_N, SORT_LENGTH, SORT_ALPHA],
                         help='''how to sort final output, by n-gram length, text
                              length, or sentence alphabetically (default: {})'''
@@ -116,6 +121,16 @@ def main():
     if not all_matches:
         print('Found no matches, exiting')
         sys.exit()
+
+    # Filter out n-grams that are part of a longer n-gram in the results.
+    if args.skip_subgrams:
+        remove = []
+        for (n1, m1) in all_matches:
+            for (n2, m2) in all_matches:
+                if ' '.join(m1) in ' '.join(m2) and n2 > n1:
+                    remove.append((n1, m1))
+        if remove:
+            all_matches -= set(remove)
 
     counts = {}
     for (true_n, m) in all_matches:
