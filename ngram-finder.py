@@ -18,6 +18,7 @@ SORT_ALPHA = 'alpha'
 DEFAULT_MIN_WORDS = 4
 DEFAULT_ZERO_RESULTS = 3
 DEFAULT_PUNCTUATION = '()' + ''.join(PunktSentenceTokenizer.PUNCTUATION)
+DEFAULT_INCLUDE_SUBGRAMS = False
 DEFAULT_SORT = SORT_N
 
 
@@ -45,10 +46,10 @@ def main():
                         help='''what characters should count as punctuation (default: {})'''
                         .format(DEFAULT_PUNCTUATION))
 
-    # TODO: User proper store_const here.
-    parser.add_argument('--skip-subgrams', type=bool, default=True,
+    parser.add_argument('--include-subgrams', action='store_true', default=DEFAULT_INCLUDE_SUBGRAMS,
                         help='''skip resulting n-grams that are subsets of any
-                             longer n-grams found (default: true)''')
+                             longer n-grams found (default: {})'''
+                             .format(DEFAULT_INCLUDE_SUBGRAMS))
 
     parser.add_argument('--sort', type=str, default=DEFAULT_SORT, choices=[SORT_N, SORT_LENGTH, SORT_ALPHA],
                         help='''how to sort final output, by n-gram length, text
@@ -93,7 +94,6 @@ def main():
     # For every n-gram length we are looking for, make sets and do an
     # intersection to find common ones.
     for i in range(args.min_words, max_words + 1):
-        # TODO: Replace last printed line for each iteration.
         print('Checking for n-grams of length {}'.format(i))
 
         ngram_sets = [set(ngrams(t, i)) for t in tokens]
@@ -123,7 +123,7 @@ def main():
         sys.exit()
 
     # Filter out n-grams that are part of a longer n-gram in the results.
-    if args.skip_subgrams:
+    if not args.include_subgrams:
         remove = []
         for (n1, m1) in all_matches:
             for (n2, m2) in all_matches:
