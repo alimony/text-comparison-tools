@@ -11,7 +11,6 @@ from nltk.tokenize.punkt import PunktSentenceTokenizer
 from tabulate import tabulate
 
 SORT_ALPHA = 'alpha'
-SORT_COMMON = 'common'
 SORT_FREQ = 'frequency'
 SORT_OCCURRENCES = 'occurrences'
 SORT_LENGTH = 'length'
@@ -27,11 +26,10 @@ def main():
                         help='text files to compare')
 
     parser.add_argument('--sort', type=str, default=DEFAULT_SORT,
-                        choices=[SORT_ALPHA, SORT_COMMON, SORT_FREQ, SORT_OCCURRENCES, SORT_LENGTH],
-                        help='''how to sort output; by word alphabetically, how common
-                        it is in the English language, by its frequency in the
-                        given texts, number of occurrences, or by word length
-                        (default: {})'''
+                        choices=[SORT_ALPHA, SORT_FREQ, SORT_OCCURRENCES, SORT_LENGTH],
+                        help='''how to sort output; by word alphabetically, by its
+                        frequency in the given texts, number of occurrences,
+                        or by word length (default: {})'''
                         .format(DEFAULT_SORT))
 
     args = parser.parse_args()
@@ -68,27 +66,25 @@ def main():
     # TODO: nltk.metrics.scores.log_likelihood(reference, test)[source]
     # Add parameter to supply a custom frequency list, e.g. one from 1902.
 
-    # Make a list of (word, common, frequency, occurrences, length) tuples for
-    # final output. `word` is the word itself, `common` is how common it is in
-    # the English language, `frequency` how often it occurs in the source text,
-    # `occurrences` in absolute numbers, and `length` is the length of the word.
-    matches = [(word, 0, round(fdist.freq(word) * 100, 5), fdist.get(word), len(word)) for word in matches]
+    # Make a list of (word, frequency, occurrences, length) tuples for final
+    # output. `word` is the word itself, `frequency` how often it occurs in the
+    # source text, `occurrences` in absolute numbers, and `length` is the length
+    # of the word.
+    matches = [(word, round(fdist.freq(word) * 100, 5), fdist.get(word), len(word)) for word in matches]
 
     # Sort output accordingly.
     if args.sort == SORT_ALPHA:
         matches = sorted(matches, key=itemgetter(0))
     # TODO: Sort all of the below on alpha second, for predictable output.
-    elif args.sort == SORT_COMMON:
-        matches = sorted(matches, key=itemgetter(1))
     elif args.sort == SORT_FREQ:
-        matches = sorted(matches, key=itemgetter(2))
+        matches = sorted(matches, key=itemgetter(1))
     elif args.sort == SORT_OCCURRENCES:
-        matches = sorted(matches, key=itemgetter(3))
+        matches = sorted(matches, key=itemgetter(2))
     elif args.sort == SORT_LENGTH:
-        matches = sorted(matches, key=itemgetter(4), reverse=True)
+        matches = sorted(matches, key=itemgetter(3), reverse=True)
 
     # Finally, print results in a nice table.
-    print(tabulate(matches, headers=['word', 'common', 'frequency %', 'occurrences', 'length']))
+    print(tabulate(matches, headers=['word', 'frequency %', 'occurrences', 'length']))
 
 if __name__ == '__main__':
     main()
