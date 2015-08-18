@@ -7,9 +7,12 @@ import sys
 from operator import itemgetter
 
 import nltk
+from nltk.corpus import stopwords
 from nltk.probability import FreqDist
 from nltk.tokenize.punkt import PunktSentenceTokenizer
 from tabulate import tabulate
+
+STOPWORDS = set(stopwords.words('english'))
 
 SORT_ALPHA = 'alpha'
 SORT_FREQ = 'frequency'
@@ -17,6 +20,7 @@ SORT_OCCURRENCES = 'occurrences'
 SORT_LENGTH = 'length'
 
 DEFAULT_PUNCTUATION = '()' + ''.join(PunktSentenceTokenizer.PUNCTUATION)
+DEFAULT_STOPWORDS = False
 DEFAULT_SORT = SORT_OCCURRENCES
 
 
@@ -25,6 +29,10 @@ def main():
 
     parser.add_argument('files', nargs='+', type=argparse.FileType('rU'),
                         help='text files to compare')
+
+    parser.add_argument('--include-stopwords', action='store_true', default=DEFAULT_STOPWORDS,
+                        help='include very common words in results (default: {})'
+                        .format(DEFAULT_STOPWORDS))
 
     parser.add_argument('--sort', type=str, default=DEFAULT_SORT,
                         choices=[SORT_ALPHA, SORT_FREQ, SORT_OCCURRENCES, SORT_LENGTH],
@@ -39,8 +47,9 @@ def main():
         sys.exit('You must specify at least two text files to compare')
 
     # Download required nltk data if needed.
-    # TODO: Do we need this?
     nltk.download('punkt')
+    if not args.include_stopwords:
+        nltk.download('stopwords')
 
     # Create the tokenized lists of words from all texts.
     texts = [f.read() for f in args.files]
@@ -59,7 +68,11 @@ def main():
 
     # Build list of matches, i.e. tokens occuring in all texts/lists of tokens.
     tokens = [set(t) for t in tokens]
-    matches = [word for word in set.intersection(*tokens)]
+    matches = {word for word in set.intersection(*tokens)}
+
+    # Remove stopwords, i.e. very common ones.
+    if not args.include_stopwords:
+        matches -= STOPWORDS
 
     # TODO: nltk.metrics.scores.log_likelihood(reference, test)[source]
     # Add parameter to supply a custom frequency list, e.g. one from 1902.
