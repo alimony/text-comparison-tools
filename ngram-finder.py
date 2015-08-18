@@ -145,18 +145,17 @@ def main():
     # definition from our sentence tokenizer.
     pattern = ' ([{}])'.format(''.join(PunktSentenceTokenizer.PUNCTUATION))
 
-    # Generate a list of (length, sentence) tuples suited for tabulate.
+    # Generate a list of (n, length, sentence) tuples suited for tabulate.
     lengths_sentences = [(n, re.sub(pattern, r'\1', ' '.join(m))) for (n, m) in all_matches]
     lengths_sentences = [(n, len(sentence), sentence) for (n, sentence) in lengths_sentences]
 
     # Sort output accordingly.
     if args.sort == SORT_N:
         lengths_sentences = sorted(lengths_sentences, key=itemgetter(0), reverse=True)
-    # TODO: Sort all of the below on alpha second, for predictable output.
     elif args.sort == SORT_LENGTH:
-        lengths_sentences = sorted(lengths_sentences, key=itemgetter(1), reverse=True)
+        lengths_sentences = sorted(lengths_sentences, key=itemgetter(1, 2), reverse=True)
     elif args.sort == SORT_ALPHA:
-        lengths_sentences = sorted(lengths_sentences, key=itemgetter(2))
+        lengths_sentences = sorted(lengths_sentences, key=itemgetter(2, 2))
 
     # Finally, print results in a nice table.
     print(tabulate(lengths_sentences, headers=['n', 'length', 'sentence']))
