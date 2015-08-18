@@ -74,6 +74,8 @@ def main():
     if not args.include_stopwords:
         matches -= STOPWORDS
 
+    print('Found {} common words'.format(len(matches)))
+
     # TODO: nltk.metrics.scores.log_likelihood(reference, test)[source]
     # Add parameter to supply a custom frequency list, e.g. one from 1902.
 
