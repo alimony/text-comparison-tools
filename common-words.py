@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 import argparse
+import itertools
 import sys
 from operator import itemgetter
 
@@ -53,10 +54,7 @@ def main():
     # Save a list of all occuring tokens, including duplicates, so we can
     # calculate the frequency of a token in the original texts, as well as just
     # the number of occurrences since FreqDist inherits collections.Counter.
-    # TODO: Use a proper sum function to combine arbitrary number of lists.
-    all_tokens = []
-    for t in tokens:
-        all_tokens.extend(t)
+    all_tokens = itertools.chain.from_iterable(tokens)
     fdist = FreqDist(all_tokens)
 
     # Build list of matches, i.e. tokens occuring in all texts/lists of tokens.
