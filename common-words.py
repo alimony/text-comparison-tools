@@ -86,13 +86,12 @@ def main():
     # Sort output accordingly.
     if args.sort == SORT_ALPHA:
         matches = sorted(matches, key=itemgetter(0))
-    # TODO: Sort all of the below on alpha second, for predictable output.
     elif args.sort == SORT_FREQ:
-        matches = sorted(matches, key=itemgetter(1))
+        matches = sorted(matches, key=itemgetter(1, 0))
     elif args.sort == SORT_OCCURRENCES:
-        matches = sorted(matches, key=itemgetter(2))
+        matches = sorted(matches, key=itemgetter(2, 0))
     elif args.sort == SORT_LENGTH:
-        matches = sorted(matches, key=itemgetter(3), reverse=True)
+        matches = sorted(matches, key=itemgetter(3, 0), reverse=True)
 
     # Finally, print results in a nice table.
     print(tabulate(matches, headers=['word', 'frequency %', 'occurrences', 'length']))
