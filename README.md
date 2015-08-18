@@ -47,6 +47,7 @@ optional arguments:
 
 ```
 usage: common-words.py [-h] [--include-stopwords]
+                       [--word-frequency-list WORD_FREQUENCY_LIST]
                        [--sort {alpha,frequency,occurrences,length}]
                        files [files ...]
 
@@ -58,6 +59,10 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   --include-stopwords   include very common words in results (default: False)
+  --word-frequency-list WORD_FREQUENCY_LIST
+                        providing a text file containing "word;frequency"
+                        lines will print that frequency data next to the word
+                        in output, and sort on it
   --sort {alpha,frequency,occurrences,length}
                         how to sort output; by word alphabetically, by its
                         frequency in the given texts, number of occurrences,

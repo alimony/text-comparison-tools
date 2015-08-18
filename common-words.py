@@ -34,6 +34,11 @@ def main():
                         help='include very common words in results (default: {})'
                         .format(DEFAULT_STOPWORDS))
 
+    parser.add_argument('--word-frequency-list', type=argparse.FileType('rU'),
+                        help='''providing a text file containing "word;frequency"
+                        lines will print that frequency data next to the word
+                        in output, and sort on it''')
+
     parser.add_argument('--sort', type=str, default=DEFAULT_SORT,
                         choices=[SORT_ALPHA, SORT_FREQ, SORT_OCCURRENCES, SORT_LENGTH],
                         help='''how to sort output; by word alphabetically, by its
@@ -76,17 +81,30 @@ def main():
 
     print('Found {} common words'.format(len(matches)))
 
-    # TODO: nltk.metrics.scores.log_likelihood(reference, test)[source]
-    # Add parameter to supply a custom frequency list, e.g. one from 1902.
-
     # Make a list of (word, frequency, occurrences, length) tuples for final
     # output. `word` is the word itself, `frequency` how often it occurs in the
     # source text, `occurrences` in absolute numbers, and `length` is the length
     # of the word.
     matches = [(word, round(fdist.freq(word) * 100, 5), fdist.get(word), len(word)) for word in matches]
+    headers = ['word', 'frequency %', 'occurrences', 'length']
+
+    if args.word_frequency_list:
+        # Read each word;frequency line as key and value for fast lookup.
+        frequencies = {}
+        for line in args.word_frequency_list:
+            term, frequency = line.split(';')
+            frequencies[term] = float(frequency)
+
+        # Go through the list of matches and look up each word's frequency, and
+        # build a new list of matches with this value included.
+        matches = [(word, percentage, occurrences, length, frequencies.get(word, 'unknown'))
+                   for (word, percentage, occurrences, length) in matches]
+        headers.append('in literature')
 
     # Sort output accordingly.
-    if args.sort == SORT_ALPHA:
+    if args.word_frequency_list:
+        matches = sorted(matches, key=itemgetter(4, 0))
+    elif args.sort == SORT_ALPHA:
         matches = sorted(matches, key=itemgetter(0))
     elif args.sort == SORT_FREQ:
         matches = sorted(matches, key=itemgetter(1, 0))
@@ -96,7 +114,7 @@ def main():
         matches = sorted(matches, key=itemgetter(3, 0), reverse=True)
 
     # Finally, print results in a nice table.
-    print(tabulate(matches, headers=['word', 'frequency %', 'occurrences', 'length']))
+    print(tabulate(matches, headers=headers))
 
 if __name__ == '__main__':
     main()
