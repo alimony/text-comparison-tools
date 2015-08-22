@@ -2,7 +2,6 @@
 # encoding: utf-8
 
 import argparse
-import itertools
 import sys
 from operator import itemgetter
 
@@ -15,7 +14,6 @@ from tabulate import tabulate
 STOPWORDS = set(stopwords.words('english'))
 
 SORT_ALPHA = 'alpha'
-SORT_FREQ = 'frequency'
 SORT_OCCURRENCES = 'occurrences'
 SORT_LENGTH = 'length'
 
@@ -39,17 +37,24 @@ def main():
                         lines will print that frequency data next to the word
                         in output, and sort on it''')
 
-    parser.add_argument('--sort', type=str, default=DEFAULT_SORT,
-                        choices=[SORT_ALPHA, SORT_FREQ, SORT_OCCURRENCES, SORT_LENGTH],
-                        help='''how to sort output; by word alphabetically, by its
-                        frequency in the given texts, number of occurrences,
-                        or by word length (default: {})'''
+    parser.add_argument('--sort', type=str, default=False,
+                        choices=[SORT_ALPHA, SORT_OCCURRENCES, SORT_LENGTH],
+                        help='''how to sort output; by word alphabetically,
+                        number of occurrences, or by word length (default: {})'''
                         .format(DEFAULT_SORT))
 
     args = parser.parse_args()
 
     if len(args.files) < 2:
         sys.exit('You must specify at least two text files to compare')
+
+    # Instead of passing the default sort order as the `default` kwarg to the
+    # parser argument, we do it this way so that we can later determine if a
+    # sort order was passed explicitly by the user or not.
+    if args.sort:
+        sort_order = args.sort
+    else:
+        sort_order = DEFAULT_SORT
 
     # Download required nltk data if needed.
     nltk.download('punkt')
@@ -65,11 +70,10 @@ def main():
     # numbers, etc.)
     tokens = [[word for word in t if word.isalpha()] for t in tokens]
 
-    # Save a list of all occuring tokens, including duplicates, so we can
-    # calculate the frequency of a token in the original texts, as well as just
-    # the number of occurrences since FreqDist inherits collections.Counter.
-    all_tokens = itertools.chain.from_iterable(tokens)
-    fdist = FreqDist(all_tokens)
+    # Save number of occurrences for each word in each text for later reference,
+    # which could as well be through a collections.Counter but FreqDist will
+    # cover more cases if expanded on later.
+    fdists = [FreqDist(t) for t in tokens]
 
     # Build list of matches, i.e. tokens occuring in all texts/lists of tokens.
     tokens = [set(t) for t in tokens]
@@ -81,12 +85,11 @@ def main():
 
     print('Found {} common words'.format(len(matches)))
 
-    # Make a list of (word, frequency, occurrences, length) tuples for final
-    # output. `word` is the word itself, `frequency` how often it occurs in the
-    # source text, `occurrences` in absolute numbers, and `length` is the length
-    # of the word.
-    matches = [(word, round(fdist.freq(word) * 100, 5), fdist.get(word), len(word)) for word in matches]
-    headers = ['word', 'frequency %', 'occurrences', 'length']
+    # Make a list of (word, occurrences, length) tuples for final output. `word`
+    # is the word itself, `occurrences` the number of times it occurs in the
+    # source text, and `length` is the length of the word.
+    matches = [(word, min([f.get(word) for f in fdists]), len(word)) for word in matches]
+    headers = ['word', 'occurrences', 'length']
 
     if args.word_frequency_list:
         # Read each word;frequency line as key and value for fast lookup.
@@ -97,21 +100,19 @@ def main():
 
         # Go through the list of matches and look up each word's frequency, and
         # build a new list of matches with this value included.
-        matches = [(word, percentage, occurrences, length, frequencies.get(word, 'unknown'))
-                   for (word, percentage, occurrences, length) in matches]
+        matches = [(word, occurrences, length, frequencies.get(word, 'unknown'))
+                   for (word, occurrences, length) in matches]
         headers.append('in literature')
 
     # Sort output accordingly.
-    if args.word_frequency_list:
-        matches = sorted(matches, key=itemgetter(4, 0))
-    elif args.sort == SORT_ALPHA:
+    if args.word_frequency_list and not args.sort:
+        matches = sorted(matches, key=itemgetter(3, 0))
+    elif sort_order == SORT_ALPHA:
         matches = sorted(matches, key=itemgetter(0))
-    elif args.sort == SORT_FREQ:
-        matches = sorted(matches, key=itemgetter(1, 0))
-    elif args.sort == SORT_OCCURRENCES:
-        matches = sorted(matches, key=itemgetter(2, 0))
-    elif args.sort == SORT_LENGTH:
-        matches = sorted(matches, key=itemgetter(3, 0), reverse=True)
+    elif sort_order == SORT_OCCURRENCES:
+        matches = sorted(matches, key=itemgetter(1, 0), reverse=True)
+    elif sort_order == SORT_LENGTH:
+        matches = sorted(matches, key=itemgetter(2, 0), reverse=True)
 
     # Finally, print results in a nice table.
     print(tabulate(matches, headers=headers))
