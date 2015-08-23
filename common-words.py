@@ -8,7 +8,6 @@ from operator import itemgetter
 import nltk
 from nltk.corpus import stopwords
 from nltk.probability import FreqDist
-from nltk.tokenize.punkt import PunktSentenceTokenizer
 from tabulate import tabulate
 
 STOPWORDS = set(stopwords.words('english'))
@@ -17,7 +16,6 @@ SORT_ALPHA = 'alpha'
 SORT_OCCURRENCES = 'occurrences'
 SORT_LENGTH = 'length'
 
-DEFAULT_PUNCTUATION = '()' + ''.join(PunktSentenceTokenizer.PUNCTUATION)
 DEFAULT_STOPWORDS = False
 DEFAULT_SORT = SORT_OCCURRENCES
 
