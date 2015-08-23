@@ -4,6 +4,7 @@
 import argparse
 import re
 import sys
+from itertools import groupby
 from operator import itemgetter
 
 import nltk
@@ -157,8 +158,11 @@ def main():
     elif args.sort == SORT_ALPHA:
         lengths_sentences = sorted(lengths_sentences, key=itemgetter(2, 2))
 
-    # Finally, print results in a nice table.
-    print(tabulate(lengths_sentences, headers=['n', 'length', 'sentence']))
+    # Finally, print results in a nice table, or actually one table for each
+    # n-gram length for good visual separation.
+    for n, results in groupby(lengths_sentences, key=itemgetter(0)):
+        print('')
+        print(tabulate(results, headers=('n', 'length', 'sentence')))
 
 if __name__ == '__main__':
     main()
