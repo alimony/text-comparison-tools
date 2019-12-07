@@ -68,3 +68,25 @@ optional arguments:
                         frequency in the given texts, number of occurrences,
                         or by word length (default: occurrences)
 ```
+
+
+### word-classes.py
+
+```
+usage: word-classes.py [-h] [--include-stopwords]
+                       [--sort {alpha,occurrences,length,class}]
+                       file
+
+Categorize (nouns, verbs, etc.) all words in a text
+
+positional arguments:
+  file                  text file to categorize
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --include-stopwords   include very common words in results (default: False)
+  --sort {alpha,occurrences,length,class}
+                        how to sort output; by word alphabetically, number of
+                        occurrences, word length, or word class (default:
+                        occurrences)
+```
