@@ -1,3 +1,2 @@
-nltk==3.4.5
-six==1.13.0
-tabulate==0.8.6
+nltk==3.6.5
+tabulate==0.8.9
