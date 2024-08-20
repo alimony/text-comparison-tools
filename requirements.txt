@@ -1,2 +1,2 @@
-nltk==3.6.5
+nltk==3.9
 tabulate==0.8.9
