@@ -29,7 +29,7 @@ def main():
     )
 
     parser.add_argument(
-        "files", nargs="+", type=argparse.FileType("rU"), help="text files to compare"
+        "files", nargs="+", type=argparse.FileType("r"), help="text files to compare"
     )
 
     parser.add_argument(

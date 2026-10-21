@@ -26,7 +26,7 @@ def main():
     )
 
     parser.add_argument(
-        "files", nargs="+", type=argparse.FileType("rU"), help="text files to compare"
+        "files", nargs="+", type=argparse.FileType("r"), help="text files to compare"
     )
 
     parser.add_argument(
@@ -40,7 +40,7 @@ def main():
 
     parser.add_argument(
         "--word-frequency-list",
-        type=argparse.FileType("rU"),
+        type=argparse.FileType("r"),
         help="""providing a text file containing "word;frequency"
                         lines will print that frequency data next to the word
                         in output, and sort on it""",

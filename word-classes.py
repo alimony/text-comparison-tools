@@ -75,7 +75,7 @@ def main():
     )
 
     parser.add_argument(
-        "file", type=argparse.FileType("rU"), help="text file to categorize"
+        "file", type=argparse.FileType("r"), help="text file to categorize"
     )
 
     parser.add_argument(
